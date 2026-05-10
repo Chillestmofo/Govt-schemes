@@ -1,0 +1,20 @@
+from langchain_huggingface import HuggingFaceEmbeddings
+import os
+
+class EmbeddingGenerator:
+    def __init__(self):
+        self.embeddings = HuggingFaceEmbeddings(
+            model_name="all-MiniLM-L6-v2"
+        )
+
+    # ✅ Used by ingestion
+    def embed_texts(self, texts: list[str]):
+        return self.embeddings.embed_documents(texts)
+
+    # ✅ Used by retriever / Chroma
+    def embed_query(self, text: str):
+        return self.embeddings.embed_query(text)
+
+    # ✅ Convenience for Chroma
+    def get_embedding_function(self):
+        return self.embeddings

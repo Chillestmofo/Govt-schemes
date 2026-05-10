@@ -1,0 +1,51 @@
+# Core backend
+fastapi==0.128.0
+uvicorn==0.40.0
+python-dotenv>=1.0.1
+requests>=2.32.3
+PyJWT>=2.10.1
+redis>=5.2.1
+rq>=1.16.2
+pywebpush>=2.0.3
+
+# LangChain (Updated to Jan 2026 Stable Versions)
+langchain==1.2.4
+langchain-community==0.4.1
+langchain-core==1.2.7
+langchain-openai==1.1.7
+langchain-chroma==1.1.0
+langchain-text-splitters==1.1.0
+
+# Vector DB
+chromadb==1.4.0
+faiss-cpu
+
+# OpenAI
+openai==2.15.0
+tiktoken==0.12.0
+
+# Pydantic (Fixed conflict here)
+pydantic==2.12.5
+pydantic-settings>=2.10.1
+
+# Indic / HuggingFace (Updated for Python 3.13)
+transformers==4.57.5
+torch>=2.9.0
+sentencepiece==0.2.1
+
+# PDF Processing
+pypdf==6.6.0
+
+# OCR Processing
+pytesseract>=0.3.10
+Pillow>=10.0.0
+pdf2image>=1.16.0
+easyocr>=1.7.0
+numpy>=1.24.0
+python-multipart>=0.0.21
+
+# Rate Limiting
+slowapi>=0.1.9
+
+# Database Migrations
+alembic>=1.13.0

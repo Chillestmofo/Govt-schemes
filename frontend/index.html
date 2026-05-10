@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="app_title">Government Scheme Assistant</title>
+    <meta name="description"
+        content="AI-powered assistant helping Indian citizens understand government schemes in their native language">
+    <meta name="theme-color" content="#047857">
+    <link rel="manifest" href="/manifest.json">
+
+    <!-- Google Fonts - Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css" onerror="this.onerror=null;this.href='/static/style.css';" />
+
+    <!-- Pre-translated Strings -->
+    <script src="translations.js?v=100" onerror="this.onerror=null;this.src='/static/translations.js?v=100';"></script>
+
+    <!-- Markdown Parser -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+
+<body>
+    <!-- Landing Page -->
+    <div id="landing-page" class="landing-page">
+        <!-- Navigation Bar -->
+        <nav class="navbar">
+            <div class="nav-logo">
+                <svg class="nav-logo-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="2" x2="12" y2="22" />
+                    <line x1="2" y1="12" x2="22" y2="12" />
+                    <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+                    <line x1="19.07" y1="4.93" x2="4.93" y2="19.07" />
+                </svg>
+                <span data-i18n="app_title">GovScheme</span>
+            </div>
+            <div class="nav-actions">
+                <!-- Language Dropdown -->
+                <div class="dropdown" id="language-dropdown">
+                    <button class="btn btn-icon-text" onclick="toggleLanguageDropdown()">
+                        <span class="lang-icon">अ</span>
+                        <span id="current-lang">English</span>
+                        <svg class="dropdown-arrow" viewBox="0 0 24 24" width="16" height="16">
+                            <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" fill="none"
+                                stroke-linecap="round" />
+                        </svg>
+                    </button>
+                    <div class="dropdown-menu" id="language-menu">
+                        <button class="dropdown-item active" data-lang="en_XX">English</button>
+                        <button class="dropdown-item" data-lang="hi_IN">हिन्दी - Hindi</button>
+                        <button class="dropdown-item" data-lang="or_IN">ଓଡ଼ିଆ - Odia</button>
+                        <button class="dropdown-item" data-lang="as_IN">অসমীয়া - Assamese</button>
+                        <button class="dropdown-item" data-lang="bn_IN">বাংলা - Bengali</button>
+                        <button class="dropdown-item" data-lang="gu_IN">ગુજરાતી - Gujarati</button>
+                        <button class="dropdown-item" data-lang="kn_IN">ಕನ್ನಡ - Kannada</button>
+                        <button class="dropdown-item" data-lang="ml_IN">മലയാളം - Malayalam</button>
+                        <button class="dropdown-item" data-lang="mr_IN">मराठी - Marathi</button>
+                        <button class="dropdown-item" data-lang="pa_IN">ਪੰਜਾਬੀ - Punjabi</button>
+                        <button class="dropdown-item" data-lang="ta_IN">தமிழ் - Tamil</button>
+                        <button class="dropdown-item" data-lang="te_IN">తెలుగు - Telugu</button>
+                        <button class="dropdown-item" data-lang="ur_IN">اردو - Urdu</button>
+                        <button class="dropdown-item" data-lang="ks_IN">कॉशुर - Kashmiri</button>
+                        <button class="dropdown-item" data-lang="mai_IN">मैथिली - Maithili</button>
+                        <div class="dropdown-footer">Powered by <strong>BHASHINI</strong></div>
+                    </div>
+                </div>
+
+                <!-- User Menu (shown when logged in) -->
+                <div id="navbar-user-menu" class="user-menu hidden">
+                    <span id="navbar-user-name" style="font-weight: 500; margin-right: 8px;"></span>
+                    <button class="btn btn-ghost" onclick="handleLogout()" data-i18n="logout">Logout</button>
+                </div>
+
+                <!-- Sign In Button (shown when not logged in) -->
+                <button id="navbar-signin-btn" class="btn btn-green" onclick="window.location.href='/auth/login'"
+                    data-i18n="nav_signin">Sign
+                    In</button>
+            </div>
+        </nav>
+
+        <!-- Hero Section - Clean White -->
+        <div class="hero">
+            <div class="hero-content-wrapper">
+                <div class="hero-text-content">
+                    <h1 class="hero-main-title">
+                        <span class="hero-accent-text" data-i18n="hero-accent">Fast-track</span><br>
+                        <span data-i18n="hero-title">to government benefits</span>
+                    </h1>
+                    <p class="hero-subtitle">
+                        Your AI-powered guide to discovering and applying for Indian government schemes in your native
+                        language.
+                    </p>
+
+                    <!-- Guest buttons (shown when not logged in) -->
+                    <div id="hero-guest-buttons" class="hero-cta-buttons">
+                        <button class="btn btn-primary" onclick="window.location.href='/profile'"
+                            data-i18n="hero-signup">Get Started</button>
+                        <button class="btn btn-outline" onclick="continueAsGuest()" data-i18n="hero-continue">Continue
+                            as Guest</button>
+                    </div>
+                    <!-- Logged in button (shown when logged in) -->
+                    <div id="hero-loggedin-buttons" class="hero-cta-buttons hidden">
+                        <button class="btn btn-primary" onclick="startChat()" data-i18n="start_chatting">Start
+                            Chatting</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Section - Minimal -->
+        <div class="stats-section-new">
+            <div class="stat-card-new">
+                <div class="stat-number-new" data-i18n="stat_schemes">500+</div>
+                <div class="stat-label-new" data-i18n="stat_schemes_label">Schemes</div>
+            </div>
+
+            <div class="stat-card-new">
+                <div class="stat-number-new" data-i18n="stat_ai">AI</div>
+                <div class="stat-label-new" data-i18n="stat_ai_label">Powered</div>
+            </div>
+
+            <div class="stat-card-new">
+                <div class="stat-number-new" data-i18n="stat_languages_new">12+</div>
+                <div class="stat-label-new" data-i18n="stat_languages_interactive">Languages</div>
+            </div>
+        </div>
+
+        <!-- Key Features Section -->
+        <div class="key-features-section">
+            <h2 class="section-title" data-i18n="features_title">Key Features</h2>
+            <!-- Subtitle removed -->
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                    </div>
+                    <div class="feature-content">
+                        <h3 class="feature-title" data-i18n="feature_secure_profile">Secure Profile</h3>
+                        <p class="feature-desc" data-i18n="feature_secure_desc">Secure your user's profile identity, and
+                            secure profile benefits.</p>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <polyline points="17 1 21 5 17 9"></polyline>
+                            <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+                            <polyline points="7 23 3 19 7 15"></polyline>
+                            <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
+                        </svg>
+                    </div>
+                    <div class="feature-content">
+                        <h3 class="feature-title" data-i18n="feature_direct_benefit">Direct Benefit Transfer</h3>
+                        <p class="feature-desc" data-i18n="feature_direct_desc">Direct Benefit transfer inconzune
+                            information benefit.</p>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path
+                                d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z">
+                            </path>
+                        </svg>
+                    </div>
+                    <div class="feature-content">
+                        <h3 class="feature-title" data-i18n="feature_multilingual">Multilingual</h3>
+                        <p class="feature-desc" data-i18n="feature_multilingual_desc">Multilingual capabilities for best
+                            in adoption and transaction answer.</p>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="8.5" cy="7" r="4"></circle>
+                            <path d="M20 8v6M23 11h-6"></path>
+                        </svg>
+                    </div>
+                    <div class="feature-content">
+                        <h3 class="feature-title" data-i18n="feature_personalized">Personalized</h3>
+                        <p class="feature-desc" data-i18n="feature_personalized_desc">Secure your identify and profile
+                            benefits</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Featured Schemes Section -->
+        <div class="featured-schemes-section">
+            <h2 class="section-title" data-i18n="featured_title">Featured Schemes</h2>
+            <!-- Subtitle removed -->
+
+            <div class="schemes-carousel">
+                <button class="carousel-btn carousel-prev" onclick="schemeCarouselPrev()">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </button>
+
+                <div class="schemes-track" id="schemesTrack">
+                    <!-- 1. Agriculture -->
+                    <div class="scheme-card">
+                        <div class="scheme-icon">
+                            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor"
+                                stroke-width="1.5">
+                                <path d="M12 2L12 6M12 6C12 10 16 12 16 16H8C8 12 12 10 12 6Z" />
+                                <path d="M8 16V22H16V16" />
+                                <path d="M4 22H20" />
+                            </svg>
+                        </div>
+                        <div class="scheme-info">
+                            <div class="scheme-count" data-i18n="scheme_agriculture_count">818 SCHEMES</div>
+                            <div class="scheme-name" data-i18n="scheme_agriculture">Agriculture & Rural</div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Banking -->
+                    <div class="scheme-card">
+                        <div class="scheme-icon">
+                            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor"
+                                stroke-width="1.5">
+                                <path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3" />
+                            </svg>
+                        </div>
+                        <div class="scheme-info">
+                            <div class="scheme-count" data-i18n="scheme_banking_count">317 SCHEMES</div>
+                            <div class="scheme-name" data-i18n="scheme_banking">Banking & Finance</div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Business -->
+                    <div class="scheme-card">
+                        <div class="scheme-icon">
+                            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor"
+                                stroke-width="1.5">
+                                <rect x="2" y="7" width="20" height="14" rx="2" />
+                                <path d="M16 7V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v3" />
+                                <path d="M12 12v4" />
+                            </svg>
+                        </div>
+                        <div class="scheme-info">
+                            <div class="scheme-count" data-i18n="scheme_business_count">705 SCHEMES</div>
+                            <div class="scheme-name" data-i18n="scheme_business">Business</div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Education -->
+                    <div class="scheme-card">
+                        <div class="scheme-icon">
+                            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor"
+                                stroke-width="1.5">
+                                <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+                                <path d="M6 12v5c0 2 3 3 6 3s6-1 6-3v-5" />
+                            </svg>
+                        </div>
+                        <div class="scheme-info">
+                            <div class="scheme-count" data-i18n="scheme_education_count">1076 SCHEMES</div>
+                            <div class="scheme-name" data-i18n="scheme_education">Education</div>
+                        </div>
+                    </div>
+
+                    <!-- 5. Health -->
+                    <div class="scheme-card">
+                        <div class="scheme-icon">
+                            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor"
+                                stroke-width="1.5">
+                                <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                            </svg>
+                        </div>
+                        <div class="scheme-info">
+                            <div class="scheme-count" data-i18n="scheme_health_count">274 SCHEMES</div>
+                            <div class="scheme-name" data-i18n="scheme_health">Health</div>
+                        </div>
+                    </div>
+
+                    <!-- 6. Housing -->
+                    <div class="scheme-card">
+                        <div class="scheme-icon">
+                            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor"
+                                stroke-width="1.5">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                                <polyline points="9 22 9 12 15 12 15 22" />
+                            </svg>
+                        </div>
+                        <div class="scheme-info">
+                            <div class="scheme-count" data-i18n="scheme_housing_count">128 SCHEMES</div>
+                            <div class="scheme-name" data-i18n="scheme_housing">Housing</div>
+                        </div>
+                    </div>
+
+                    <!-- 7. Public Safety -->
+                    <div class="scheme-card">
+                        <div class="scheme-icon">
+                            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor"
+                                stroke-width="1.5">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                            </svg>
+                        </div>
+                        <div class="scheme-info">
+                            <div class="scheme-count" data-i18n="scheme_public_safety_count">29 SCHEMES</div>
+                            <div class="scheme-name" data-i18n="scheme_public_safety">Public Safety</div>
+                        </div>
+                    </div>
+
+                    <!-- 8. Science -->
+                    <div class="scheme-card">
+                        <div class="scheme-icon">
+                            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor"
+                                stroke-width="1.5">
+                                <circle cx="12" cy="12" r="10" />
+                                <path
+                                    d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                            </svg>
+                        </div>
+                        <div class="scheme-info">
+                            <div class="scheme-count" data-i18n="scheme_science_count">100 SCHEMES</div>
+                            <div class="scheme-name" data-i18n="scheme_science">Science & IT</div>
+                        </div>
+                    </div>
+
+                    <!-- 9. Skills -->
+                    <div class="scheme-card">
+                        <div class="scheme-icon">
+                            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor"
+                                stroke-width="1.5">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                                <circle cx="9" cy="7" r="4" />
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+                            </svg>
+                        </div>
+                        <div class="scheme-info">
+                            <div class="scheme-count" data-i18n="scheme_skills_count">368 SCHEMES</div>
+                            <div class="scheme-name" data-i18n="scheme_skills">Skills</div>
+                        </div>
+                    </div>
+
+                    <!-- 10. Social Welfare -->
+                    <div class="scheme-card">
+                        <div class="scheme-icon">
+                            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor"
+                                stroke-width="1.5">
+                                <path
+                                    d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                            </svg>
+                        </div>
+                        <div class="scheme-info">
+                            <div class="scheme-count" data-i18n="scheme_social_welfare_count">1456 SCHEMES</div>
+                            <div class="scheme-name" data-i18n="scheme_social_welfare">Social Welfare</div>
+                        </div>
+                    </div>
+
+                    <!-- 11. Sports -->
+                    <div class="scheme-card">
+                        <div class="scheme-icon">
+                            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor"
+                                stroke-width="1.5">
+                                <circle cx="12" cy="12" r="10" />
+                                <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+                                <path d="M2 12h20" />
+                            </svg>
+                        </div>
+                        <div class="scheme-info">
+                            <div class="scheme-count" data-i18n="scheme_sports_count">248 SCHEMES</div>
+                            <div class="scheme-name" data-i18n="scheme_sports">Sports</div>
+                        </div>
+                    </div>
+
+                    <!-- 12. Transport -->
+                    <div class="scheme-card">
+                        <div class="scheme-icon">
+                            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor"
+                                stroke-width="1.5">
+                                <rect x="1" y="3" width="15" height="13" rx="2" />
+                                <path d="M16 8h4l3 4v5h-7V8z" />
+                                <circle cx="5.5" cy="18.5" r="2.5" />
+                                <circle cx="18.5" cy="18.5" r="2.5" />
+                            </svg>
+                        </div>
+                        <div class="scheme-info">
+                            <div class="scheme-count" data-i18n="scheme_transport_count">86 SCHEMES</div>
+                            <div class="scheme-name" data-i18n="scheme_transport">Transport</div>
+                        </div>
+                    </div>
+
+                    <!-- 13. Travel -->
+                    <div class="scheme-card">
+                        <div class="scheme-icon">
+                            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor"
+                                stroke-width="1.5">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                                <circle cx="12" cy="10" r="3" />
+                            </svg>
+                        </div>
+                        <div class="scheme-info">
+                            <div class="scheme-count" data-i18n="scheme_travel_count">91 SCHEMES</div>
+                            <div class="scheme-name" data-i18n="scheme_travel">Travel & Tourism</div>
+                        </div>
+                    </div>
+
+                    <!-- 14. Utility -->
+                    <div class="scheme-card">
+                        <div class="scheme-icon">
+                            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor"
+                                stroke-width="1.5">
+                                <path
+                                    d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+                            </svg>
+                        </div>
+                        <div class="scheme-info">
+                            <div class="scheme-count" data-i18n="scheme_utility_count">58 SCHEMES</div>
+                            <div class="scheme-name" data-i18n="scheme_utility">Utility</div>
+                        </div>
+                    </div>
+
+                    <!-- 15. Women & Child -->
+                    <div class="scheme-card">
+                        <div class="scheme-icon">
+                            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor"
+                                stroke-width="1.5">
+                                <circle cx="12" cy="5" r="3" />
+                                <path d="M12 22V8M9 12l3-2 3 2" />
+                                <path d="M5 17h14" />
+                            </svg>
+                        </div>
+                        <div class="scheme-info">
+                            <div class="scheme-count" data-i18n="scheme_women_count">458 SCHEMES</div>
+                            <div class="scheme-name" data-i18n="scheme_women">Women & Child</div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="carousel-btn carousel-next" onclick="schemeCarouselNext()">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- How It Works Section -->
+        <div class="how-it-works-section">
+            <h2 class="section-title" data-i18n="how_title">How it Works</h2>
+            <!-- Subtitle removed -->
+
+            <div class="steps-container">
+                <div class="step-item">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3 class="step-title" data-i18n="step1_title">Give you information</h3>
+                    </div>
+                </div>
+
+                <div class="step-arrow">→</div>
+
+                <div class="step-item">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3 class="step-title" data-i18n="step2_title">Get personalized schemes</h3>
+                    </div>
+                </div>
+
+                <div class="step-arrow">→</div>
+
+                <div class="step-item">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3 class="step-title" data-i18n="step3_title">Avail benefits of the scheme</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chatbot Illustration Removed for Minimal Look -->
+            <div style="height: 60px;"></div>
+        </div>
+    </div>
+
+    <!-- Chat Container (hidden initially) -->
+    <div id="chat-page" class="chat-page hidden">
+        <div class="chat-container">
+            <!-- Header -->
+            <div class="header">
+                <div class="logo-text">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="2" x2="12" y2="22" />
+                        <line x1="2" y1="12" x2="22" y2="12" />
+                        <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+                        <line x1="19.07" y1="4.93" x2="4.93" y2="19.07" />
+                    </svg>
+                    <span data-i18n="logo-text">Government Scheme Assistant <span style="font-size: 0.5em; opacity: 0.5;">v2.5</span></span>
+                </div>
+                <div class="header-right">
+                    <div class="status-badge">
+                        <div class="status-dot"></div>
+                        <span data-i18n="status-online">Online</span>
+                    </div>
+
+                    <!-- Language Dropdown (Chat) -->
+                    <div class="dropdown" id="chat-language-dropdown">
+                        <button class="btn btn-icon-text btn-sm" onclick="toggleChatLanguageDropdown()">
+                            <span class="lang-icon">अ</span>
+                            <span id="chat-current-lang">English</span>
+                        </button>
+                        <div class="dropdown-menu" id="chat-language-menu">
+                            <button class="dropdown-item active" data-lang="en_XX">English</button>
+                            <button class="dropdown-item" data-lang="hi_IN">हिन्दी - Hindi</button>
+                            <button class="dropdown-item" data-lang="or_IN">ଓଡ଼ିଆ - Odia</button>
+                            <button class="dropdown-item" data-lang="as_IN">অসমীয়া - Assamese</button>
+                            <button class="dropdown-item" data-lang="bn_IN">বাংলা - Bengali</button>
+                            <button class="dropdown-item" data-lang="gu_IN">ગુજરાતી - Gujarati</button>
+                            <button class="dropdown-item" data-lang="kn_IN">ಕನ್ನಡ - Kannada</button>
+                            <button class="dropdown-item" data-lang="ml_IN">മലയാളം - Malayalam</button>
+                            <button class="dropdown-item" data-lang="mr_IN">मराठी - Marathi</button>
+                            <button class="dropdown-item" data-lang="pa_IN">ਪੰਜਾਬੀ - Punjabi</button>
+                            <button class="dropdown-item" data-lang="ta_IN">தமிழ் - Tamil</button>
+                            <button class="dropdown-item" data-lang="te_IN">తెలుగు - Telugu</button>
+                            <button class="dropdown-item" data-lang="ur_IN">اردو - Urdu</button>
+                        </div>
+                    </div>
+
+
+
+                    <div id="user-menu" class="user-menu hidden">
+                        <span id="user-name-display" data-i18n="user-name-display"></span>
+                        <button type="button" class="btn btn-ghost btn-sm"
+                            onclick="window.location.href='/profile?mode=edit'; return false;"
+                            style="margin-right: 0.5rem;" data-i18n="edit_profile">Edit Profile</button>
+                        <button type="button" class="btn btn-ghost btn-sm"
+                            onclick="window.location.href='/saved.html'; return false;" style="margin-right: 0.5rem;">
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
+                                stroke-width="2" style="vertical-align: -2px;">
+                                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                            </svg>
+                            Saved</button>
+                        <button class="btn btn-ghost btn-sm" onclick="handleLogout()" data-i18n="logout">Logout</button>
+                    </div>
+                    <div id="auth-buttons" class="auth-buttons">
+                        <button class="btn btn-primary btn-sm" onclick="openAuthModal('signin')" data-i18n="signin">Sign
+                            In</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Area -->
+            <div id="chat-box">
+                <div class="welcome-message">
+                    <div class="welcome-title" data-i18n="chat_welcome_title">Welcome to Government Scheme Assistant
+                    </div>
+                    <p data-i18n="chat_welcome_desc">I can help you understand eligibility, benefits, and application
+                        processes for Indian government
+                        schemes in your preferred language.</p>
+                </div>
+            </div>
+
+            <!-- Response Limit Warning -->
+            <div id="response-limit-banner" class="response-limit-banner hidden">
+                <span id="responses-remaining" data-i18n="chat_limit_msg">3 free messages remaining</span>
+            </div>
+
+            <div id="input-area" class="input-area">
+                <div class="input-wrapper">
+
+                    <input type="text" id="user-input" placeholder="Type your message..."
+                        onkeydown="if(event.key==='Enter') sendMessage()" autocomplete="off"
+                        data-i18n-placeholder="chat_input_placeholder" />
+                    <button onclick="sendMessage()" aria-label="Send">
+                        <svg viewBox="0 0 24 24">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scheme Finder Modal -->
+    <div id="scheme-finder-modal" class="modal-overlay hidden" onclick="handleSchemeFinderOverlayClick(event)">
+        <div class="modal-container modal-lg" onclick="event.stopPropagation()">
+            <!-- Close Button -->
+            <button class="modal-close" onclick="closeSchemeFinderModal()">
+                <svg viewBox="0 0 24 24" width="24" height="24">
+                    <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
+            </button>
+
+            <h2 class="modal-title" data-i18n="sf_modal_title">Help us find the best schemes for you</h2>
+
+            <!-- Form Content (Single Page) -->
+            <div class="scheme-form-container">
+                <div class="scheme-form-content">
+
+                    <!-- OCR Section (visible in Edit Profile mode) -->
+                    <div id="edit-ocr-section" class="form-section ocr-section hidden">
+                        <h3 data-i18n="sf_h_documents">Verify with Documents</h3>
+                        <p class="ocr-section-desc" data-i18n="sf_ocr_desc">Scan a document to auto-fill or verify your
+                            profile information</p>
+                        <button type="button" class="btn btn-verify-scan" onclick="openVerificationModalFromEdit()"
+                            style="width: 100%; margin-top: 12px;">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2" />
+                                <path d="M9 9h6v6H9z" />
+                            </svg>
+                            <span data-i18n="verify_scan_btn">Scan Document to Verify</span>
+                        </button>
+                    </div>
+
+                    <!-- Section 1: Account -->
+                    <div class="form-section">
+                        <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                            <h3 data-i18n="sf_h_account">Create your account</h3>
+                            <div style="font-size: 0.9em;">
+                                <span data-i18n="sf_msg_have_account">Already have an account?</span>
+                                <a href="#" onclick="switchToSignInFromScheme(event)"
+                                    style="color: var(--primary); text-decoration: none; font-weight: 500;"
+                                    data-i18n="sf_link_signin">Sign In</a>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" data-i18n="sf_lbl_name">Full Name <span
+                                    class="required">*</span></label>
+                            <input type="text" id="sf-name" class="form-input" placeholder="Enter your name"
+                                data-i18n-placeholder="sf_pl_name" />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email Address <span style="color:var(--text-muted);font-size:0.8em;font-weight:400;">(optional)</span></label>
+                            <input type="email" id="sf-email" class="form-input" placeholder="you@example.com (leave blank to skip)" />
+                        </div>
+                        <div class="form-group" id="password-group">
+                            <label class="form-label">Password <span style="color:var(--text-muted);font-size:0.8em;font-weight:400;">(only if email provided)</span></label>
+                            <input type="password" id="sf-password" class="form-input" placeholder="At least 6 characters" />
+                        </div>
+                        <p class="form-hint" style="margin-top:-8px;">📱 No email? No problem — your profile is saved in this browser automatically.</p>
+                    </div>
+
+                    <!-- Section 2: Personal Details -->
+                    <div class="form-section">
+                        <h3 data-i18n="sf_h_about">About You</h3>
+                        <div class="form-group">
+                            <label class="form-label" data-i18n="sf_lbl_gender">Gender <span
+                                    class="required">*</span></label>
+                            <div class="selection-cards" id="gender-selection">
+                                <button class="selection-card" data-value="male" onclick="selectCard(this, 'gender')">
+                                    <span class="card-icon">♂</span><span data-i18n="sf_opt_male">Male</span>
+                                </button>
+                                <button class="selection-card" data-value="female" onclick="selectCard(this, 'gender')">
+                                    <span class="card-icon">♀</span><span data-i18n="sf_opt_female">Female</span>
+                                </button>
+                                <button class="selection-card" data-value="transgender"
+                                    onclick="selectCard(this, 'gender')">
+                                    <span class="card-icon">⚧</span><span data-i18n="sf_opt_trans">Transgender</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" data-i18n="sf_lbl_age">Age <span class="required">*</span></label>
+                            <input type="text" id="sf-age" class="form-input" placeholder="Enter your age" inputmode="numeric" data-i18n-placeholder="sf_pl_age">
+                        </div>
+                    </div>
+
+                    <!-- Section 3: Location -->
+                    <div class="form-section">
+                        <h3 data-i18n="sf_h_loc">Location</h3>
+                        <div class="form-group">
+                            <label class="form-label" data-i18n="sf_lbl_state">State</label>
+                            <div class="custom-select-wrapper" id="state-select-wrapper">
+                                <button type="button" class="custom-select-trigger" id="state-select-trigger">
+                                    <span data-i18n="sf_opt_sel_state">Select State</span>
+                                </button>
+                                <div class="custom-select-options" id="state-select-options">
+                                    <div class="custom-select-option" data-value="">Select State</div>
+                                    <div class="custom-select-option" data-value="AP">Andhra Pradesh</div>
+                                    <div class="custom-select-option" data-value="AR">Arunachal Pradesh</div>
+                                    <div class="custom-select-option" data-value="AS">Assam</div>
+                                    <div class="custom-select-option" data-value="BR">Bihar</div>
+                                    <div class="custom-select-option" data-value="CG">Chhattisgarh</div>
+                                    <div class="custom-select-option" data-value="GA">Goa</div>
+                                    <div class="custom-select-option" data-value="GJ">Gujarat</div>
+                                    <div class="custom-select-option" data-value="HR">Haryana</div>
+                                    <div class="custom-select-option" data-value="HP">Himachal Pradesh</div>
+                                    <div class="custom-select-option" data-value="JH">Jharkhand</div>
+                                    <div class="custom-select-option" data-value="KA">Karnataka</div>
+                                    <div class="custom-select-option" data-value="KL">Kerala</div>
+                                    <div class="custom-select-option" data-value="MP">Madhya Pradesh</div>
+                                    <div class="custom-select-option" data-value="MH">Maharashtra</div>
+                                    <div class="custom-select-option" data-value="MN">Manipur</div>
+                                    <div class="custom-select-option" data-value="ML">Meghalaya</div>
+                                    <div class="custom-select-option" data-value="MZ">Mizoram</div>
+                                    <div class="custom-select-option" data-value="NL">Nagaland</div>
+                                    <div class="custom-select-option" data-value="OR">Odisha</div>
+                                    <div class="custom-select-option" data-value="PB">Punjab</div>
+                                    <div class="custom-select-option" data-value="RJ">Rajasthan</div>
+                                    <div class="custom-select-option" data-value="SK">Sikkim</div>
+                                    <div class="custom-select-option" data-value="TN">Tamil Nadu</div>
+                                    <div class="custom-select-option" data-value="TG">Telangana</div>
+                                    <div class="custom-select-option" data-value="TR">Tripura</div>
+                                    <div class="custom-select-option" data-value="UP">Uttar Pradesh</div>
+                                    <div class="custom-select-option" data-value="UK">Uttarakhand</div>
+                                    <div class="custom-select-option" data-value="WB">West Bengal</div>
+                                    <div class="custom-select-option" data-value="AN">Andaman & Nicobar</div>
+                                    <div class="custom-select-option" data-value="CH">Chandigarh</div>
+                                    <div class="custom-select-option" data-value="DL">Delhi</div>
+                                    <div class="custom-select-option" data-value="JK">Jammu & Kashmir</div>
+                                    <div class="custom-select-option" data-value="LA">Ladakh</div>
+                                    <div class="custom-select-option" data-value="LD">Lakshadweep</div>
+                                    <div class="custom-select-option" data-value="PY">Puducherry</div>
+                                </div>
+                            </div>
+                            <input type="hidden" id="sf-state" value="">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" data-i18n="sf_lbl_city">City/District</label>
+                            <input type="text" id="sf-city" class="form-input" placeholder="Enter your city/district" data-i18n-placeholder="sf_pl_city" />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" data-i18n="sf_lbl_area">Area Type <span
+                                    class="required">*</span></label>
+                            <div class="toggle-buttons" id="area-selection">
+                                <button class="toggle-btn" data-value="urban" onclick="selectToggle(this, 'area')">
+                                    <span data-i18n="sf_opt_urban">Urban</span>
+                                </button>
+                                <button class="toggle-btn" data-value="rural" onclick="selectToggle(this, 'area')">
+                                    <span data-i18n="sf_opt_rural">Rural</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 4: Social Category -->
+                    <div class="form-section">
+                        <h3 data-i18n="sf_h_social">Social Details</h3>
+                        <div class="form-group">
+                            <label class="form-label" data-i18n="sf_lbl_cat">Category <span
+                                    class="required">*</span></label>
+                            <div class="category-cards" id="category-selection">
+                                <button class="category-card" data-value="general" onclick="selectCategory(this)">
+                                    <span data-i18n="sf_cat_gen">General</span>
+                                </button>
+                                <button class="category-card" data-value="obc" onclick="selectCategory(this)">
+                                    <span data-i18n="sf_cat_obc">OBC</span>
+                                </button>
+                                <button class="category-card" data-value="sc" onclick="selectCategory(this)">
+                                    <span data-i18n="sf_cat_sc">SC</span>
+                                </button>
+                                <button class="category-card" data-value="st" onclick="selectCategory(this)">
+                                    <span data-i18n="sf_cat_st">ST</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" data-i18n="sf_lbl_pwd">Person with Disability? <span
+                                    class="required">*</span></label>
+                            <div class="toggle-buttons" id="disability-selection">
+                                <button class="toggle-btn" data-value="yes" onclick="selectToggle(this, 'disability')">
+                                    <span data-i18n="sf_opt_yes">Yes</span>
+                                </button>
+                                <button class="toggle-btn" data-value="no" onclick="selectToggle(this, 'disability')">
+                                    <span data-i18n="sf_opt_no">No</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 5: Employment & Education -->
+                    <div class="form-section">
+                        <h3 data-i18n="sf_h_emp">Employment & Education</h3>
+                        <div class="form-group">
+                            <label class="form-label" data-i18n="sf_lbl_status">Employment Status <span
+                                    class="required">*</span></label>
+                            <div class="selection-cards employment-cards" id="employment-selection">
+                                <button class="selection-card" data-value="employed"
+                                    onclick="selectCard(this, 'employment')">
+                                    <span data-i18n="sf_emp_emp">Employed</span>
+                                </button>
+                                <button class="selection-card" data-value="unemployed"
+                                    onclick="selectCard(this, 'employment')">
+                                    <span data-i18n="sf_emp_unemp">Unemployed</span>
+                                </button>
+                                <button class="selection-card" data-value="college_student"
+                                    onclick="selectCard(this, 'employment')">
+                                    <span data-i18n="sf_emp_college">College Student</span>
+                                </button>
+                                <button class="selection-card" data-value="self-employed"
+                                    onclick="selectCard(this, 'employment')">
+                                    <span data-i18n="sf_emp_self">Self-Employed</span>
+                                </button>
+                                <button class="selection-card" data-value="other"
+                                    onclick="selectCard(this, 'employment')">
+                                    <span data-i18n="sf_emp_other">Others</span>
+                                </button>
+                            </div>
+                            <!-- Others employment input -->
+                            <div id="other-employment-wrapper" class="hidden" style="margin-top: 10px;">
+                                <input type="text" id="sf-employment-other" class="form-input" placeholder="Please specify your status" data-i18n-placeholder="sf_pl_emp_other">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" data-i18n="sf_lbl_govt">Govt Employee? <span
+                                    class="required">*</span></label>
+                            <div class="toggle-buttons" id="govt-employee-selection">
+                                <button class="toggle-btn" data-value="yes"
+                                    onclick="selectToggle(this, 'govt-employee')">
+                                    <span data-i18n="sf_opt_yes">Yes</span>
+                                </button>
+                                <button class="toggle-btn" data-value="no"
+                                    onclick="selectToggle(this, 'govt-employee')">
+                                    <span data-i18n="sf_opt_no">No</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 6: Income -->
+                    <div class="form-section">
+                        <h3 data-i18n="sf_h_income">Income Details</h3>
+                        <div class="form-group">
+                            <label class="form-label" data-i18n="sf_lbl_inc_ann">Annual Income (₹)</label>
+                            <input type="text" id="sf-annual-income" class="form-input" placeholder="0" inputmode="numeric"
+                                data-i18n-placeholder="sf_pl_zero" />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" data-i18n="sf_lbl_inc_fam">Family Income (₹)</label>
+                            <input type="text" id="sf-family-income" class="form-input" placeholder="0" inputmode="numeric"
+                                data-i18n-placeholder="sf_pl_zero" />
+                        </div>
+                    </div>
+
+                    <!-- Section 7: Document Scan (OCR) -->
+                    <div class="form-section ocr-section">
+                        <h3 data-i18n="sf_h_scan">📄 Quick Fill with Document Scan</h3>
+                        <p class="form-hint" data-i18n="sf_scan_hint">Upload your Aadhaar, PAN, or Caste Certificate to
+                            auto-fill your details.</p>
+
+                        <div class="ocr-upload-area">
+                            <input type="file" id="ocr-file-input" accept="image/*,.pdf" class="hidden"
+                                onchange="handleOCRFileSelect(event)">
+                            <button type="button" class="btn btn-outline-primary btn-scan"
+                                onclick="document.getElementById('ocr-file-input').click()">
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                                    <circle cx="8.5" cy="8.5" r="1.5" />
+                                    <path d="M21 15l-5-5L5 21" />
+                                </svg>
+                                <span data-i18n="sf_btn_scan">Select Document</span>
+                            </button>
+                            <span id="ocr-file-name" class="ocr-file-name"></span>
+                        </div>
+
+                        <button type="button" class="btn btn-primary btn-full" id="ocr-scan-btn"
+                            onclick="scanDocumentForOCR()" style="display: none;">
+                            <span data-i18n="sf_btn_scan_now">Scan Document</span>
+                        </button>
+
+                        <!-- OCR Loading -->
+                        <div id="ocr-loading" class="ocr-loading hidden">
+                            <div class="spinner-small"></div>
+                            <span data-i18n="sf_scan_loading">Scanning document...</span>
+                        </div>
+
+                        <!-- OCR Results -->
+                        <div id="ocr-results" class="ocr-results hidden">
+                            <div class="ocr-results-header">
+                                <span data-i18n="sf_scan_results">Extracted Information</span>
+                                <button type="button" class="btn btn-success btn-sm" onclick="applyOCRDataToForm()">
+                                    <span data-i18n="sf_btn_apply">Apply to Form</span>
+                                </button>
+                            </div>
+                            <div id="ocr-fields" class="ocr-fields"></div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="scheme-form-actions">
+                <button class="btn btn-cta btn-full" id="sf-submit-btn" onclick="submitSchemeForm()"
+                    data-i18n="sf_submit_btn">
+                    Submit Profile & Start Chat
+                </button>
+            </div>
+
+            <!-- Loading State -->
+            <div id="scheme-form-loading" class="form-loading hidden">
+                <div class="spinner"></div>
+                <p data-i18n="sf_loading">Setting up your profile...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auth Modal (Sign In only) -->
+    <div id="auth-modal" class="modal-overlay hidden" onclick="handleOverlayClick(event)">
+        <div class="modal-container" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeAuthModal()">
+                <svg viewBox="0 0 24 24" width="24" height="24">
+                    <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
+            </button>
+
+            <div id="auth-prompt-message" class="auth-prompt-message hidden" data-i18n="auth-prompt-message">
+                Sign in or create an account to continue chatting
+            </div>
+
+            <div class="form-slide">
+                <h2 class="form-title" data-i18n="signin-title">Welcome Back</h2>
+                <p class="form-subtitle" data-i18n="signin-subtitle">Sign in to continue chatting</p>
+
+                <div class="form-group">
+                    <label class="form-label" data-i18n="signin-email">Email Address <span
+                            class="required">*</span></label>
+                    <input type="email" id="signin-email" class="form-input" placeholder="you@example.com"
+                        autocomplete="email" />
+                    <span class="form-error" id="error-signin-email"></span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <span data-i18n="auth_lbl_password">Password</span>
+                        <span class="required">*</span>
+                    </label>
+                    <input type="password" id="signin-password" class="form-input" placeholder="Enter your password"
+                        data-i18n-placeholder="auth_pl_password" autocomplete="current-password" />
+                    <span class="form-error" id="error-signin-password"></span>
+                </div>
+
+                <div class="form-link">
+                    <a href="#" data-i18n="forgot-password">Forgot Password?</a>
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn btn-primary btn-full" onclick="submitSignIn()" data-i18n="signin-btn">
+                        Sign In →
+                    </button>
+                </div>
+                <div class="form-footer">
+                    <span data-i18n="auth_msg_no_account">Don't have an account?</span>
+
+                    <a href="/profile" onclick="window.location.href='/profile'; return false;"
+                        data-i18n="auth_link_signup">Sign Up</a>
+                </div>
+            </div>
+
+            <div id="form-loading" class="form-loading hidden">
+                <div class="spinner"></div>
+                <p data-i18n="signin-loading">Signing in...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Verification Modal (Post Sign-Up) -->
+    <div id="verification-modal" class="modal-overlay hidden" onclick="handleVerificationOverlayClick(event)">
+        <div class="modal-container modal-md verification-modal" onclick="event.stopPropagation()">
+            <!-- Close Button -->
+            <button class="modal-close" onclick="closeVerificationModal()">
+                <svg viewBox="0 0 24 24" width="24" height="24">
+                    <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
+            </button>
+
+            <!-- Document Icon -->
+            <div class="verification-icon">
+                <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#10b981" stroke-width="1.5">
+                    <path
+                        d="M9 12h6M9 16h6M17 21H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+            </div>
+
+            <h2 class="modal-title" data-i18n="verify_title">Verify Your Details</h2>
+            <p class="modal-subtitle" data-i18n="verify_subtitle">Would you like to scan a document to verify your
+                entered information?</p>
+
+            <!-- Scan Button -->
+            <div id="verify-scan-section">
+                <button class="btn btn-verify-scan btn-full" onclick="triggerVerificationFileInput()">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                        <path d="M9 9h6v6H9z" />
+                    </svg>
+                    <span data-i18n="verify_scan_btn">Scan Document to Verify</span>
+                </button>
+                <input type="file" id="verify-file-input" accept="image/png,image/jpeg,application/pdf"
+                    onchange="handleVerificationFileSelect(event)" style="display: none;" />
+            </div>
+
+            <!-- Selected File Display -->
+            <div id="verify-file-display" class="verify-file-display hidden">
+                <span id="verify-file-name"></span>
+                <button class="btn btn-verify-process btn-full" onclick="processVerificationDocument()">
+                    <span data-i18n="verify_process_btn">Process Document</span>
+                </button>
+            </div>
+
+            <!-- Processing Indicator -->
+            <div id="verify-processing" class="verify-processing hidden">
+                <div class="spinner"></div>
+                <p data-i18n="verify_processing">Scanning document...</p>
+            </div>
+
+            <!-- Comparison Results -->
+            <div id="verify-comparison" class="verify-comparison hidden">
+                <h3 class="comparison-title" data-i18n="verify_comparison_title">Comparison Results</h3>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th data-i18n="verify_field">Field</th>
+                            <th data-i18n="verify_entered">Entered</th>
+                            <th data-i18n="verify_scanned">Scanned</th>
+                        </tr>
+                    </thead>
+                    <tbody id="comparison-table-body">
+                        <!-- Populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Error Display -->
+            <div id="verify-error" class="verify-error hidden">
+                <p id="verify-error-message"></p>
+            </div>
+
+            <!-- Divider -->
+            <div class="verify-divider">
+                <span>OR</span>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="verify-actions">
+                <button class="btn btn-outline btn-full" onclick="skipVerification()" data-i18n="verify_skip">
+                    Skip Verification
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Language Loading Overlay -->
+
+    <div id="language-loading-overlay" class="language-loading-overlay hidden">
+        <div class="language-loading-content">
+            <div class="language-loading-spinner"></div>
+            <h3 id="language-loading-title">Switching to हिन्दी...</h3>
+            <p id="language-loading-status">Verifying translation model...</p>
+        </div>
+    </div>
+
+    <!-- DOMPurify for XSS sanitization -->
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js"></script>
+    <!-- JS -->
+    <script src="script.js?v=100" onerror="this.onerror=null;this.src='/static/script.js?v=100';"></script>
+
+    <script>
+        // Unregister any service workers to prevent stale JS caching
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(registrations => {
+                for (let r of registrations) r.unregister();
+            });
+        }
+    </script>
+</body>
+
+</html>

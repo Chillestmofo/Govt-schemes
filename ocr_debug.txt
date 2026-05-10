@@ -1,0 +1,43 @@
+RAW OCR TEXT:
+माग्न   सरकार
+आधार
+Goverrimierit Iriclia
+AADHAAR
+भारत सरकार
+सूचना INFORMATION
+Government of India
+आधार पहचान प्रमाण है नागरिकता या जन्मतिथि का नर्हीl जन्मतिथि आधार नबर धारक द्वारा पस्तुत्त सूचना और विनियर्मों में विनिर्दिष्ट जन्मतिथि प्रमाण के दस्तावेज पर आधारित है डस आधार पत्र को यूआईडीएआई द्वारा नियुक्त प्रमाणीकरण एजेंसी के जरिए ऑनलाइन प्रमाणीकरण के द्वारा सत्यापित किया जाना चाहिए या ऐप स्टोर में उपलब्ध एमआधार या आधार क्यूआर कोड स्कैनर ऐप से क्यूआर कोड को स्कैन करके या  WW uidai gov in. पर उपलब्ध सुरदषित क्यूआर कोड रोडर का उपयोग करके सत्यापित किया जाना चाहिए आधार विशिष्ट और सुरक्षित है पहचान और पते के समर्थन र्में दस्तावेजों को आधार के लिए नामांकन की तारीख से प्रत्येक १० वर्ष र्में कम से कम एक बार आधार र्मे अपडेट कराना चाहिए आधार विभिन्न सरकारी और गैर्सरकारी फायदौं सेवाओं का लाभ लेने में सहायता करता है आधार र्में अपना मोबाइल नंबर और ईमेल आईडी अपडेट रर्खे | आधार सेवाओं का लाभ लेने के लिए एमआधार ऐप डाउनलोड करें | आधार बॉयोमेट्रिक्स का उपयोग न करने के समय सुरक्षा सुनिश्चित करने के लिए आधार बॉयोमेट्रिक्स्त लॉकाअनलॉक मुविधा का उपयोग करें| आधार की मांग करने वाले सहमति लेने के लिए बाध्य हैं| Aadhaar is proof of identity not of citizenship or date of birth IDOBJ. DOB is based on information supported by proof ofDOB document specifiedin regulations, submittedby Aadhaar number holder This Aadhaar letter should be verified through either online authentication by UIDAl appointed authentication agency or QR code scanning using mAadhaar or Aadhaar QR Scanner app available in app stores Or using secure OR code reader app available on 7177 uidai govin Aadhaar unique and secure Documents to support identity and address should be updated in Aadhaar after every १० years from date of enrolment for Aachaar. Aadhaar helps yOU avail of various Government and Non- Government benefits services Keep your mobile number and email id updated in Aadhaar. Download mAadhaar app to avail of Aadhaar services. Use the feature of Lock Unlock Aadhaar biometrics to ensure security when not using Aadhaar biometrics Entities seeking Aadhaar are obligated to seek consent
+भारतीय विशिष्ट पहचान प्राधिकरण Unique Identification Authority of India नामांकन क्रम Enrolment No.: 0870/28151/03123
+देवेश कृष्ण Devesh Krishn SO: Neeraj Kumar,
+sector 4, radha puram estate VTC: Mathura Bangar, PO: Krishna Nagar, Sub District: Chhata District: Mathura, State: Uttar Pradesh PIN Code: २४10०4 Hlobile: 8755838888
+SIDn=LLIB
++ETIfIB-
+Dalalkae UnFula 2075.09.15 1$21:23
+आपका आधार क्रमांक Your Aadhaar No. 9660 2783 6699 VID : 9153 7265 7359 5388 मेरा आधार , मेरी पहचान
+भारत सरकार
+भारतीय विशेिष्ट पहचान प्राधिकरण Unique Identification Authority of India
+Goverment of India
+देवेश कृष्ण Devesh Krishn " 7- तिथि DOB: 02 |03 /20O6
+पताः आत्मजः नोरज कुमार, ५५ सेक्टर ४ राधा पुरम एस्टेट, मधुरा चागर कृष्णा नगर ड्लै उत्तर प्रदश - २8२० मथुरा, ढ Sddreseeraj Kumar 5५ sector 4 radha puram estate, Mathura Bangar PO: Krishna Nagar DIST: Mathura, Uttar Pradesh 281004 ड्लै
+ड्ै ड्लँ 8
+पुरुष MALE
+आधार पहचान का प्रमाण नागरिकना या जन्मतिथि का नहीं 4सक उपयोग सत्यापन ( ऑनलाञ्न प्रमाणीकरण , या क्यूआर clटy आंफ़ः्लाइन एक्स्एमएल को स्कानेंग) क साथ किया जाना चााहेए Aadhaar proof of identity not of citizenship date of birth. should DC used with verinication online authentication scanning of QR code offline XML).
+9660 2783 6699 ViD 9153 7265 7359 5388
+9660 2783 6699 मरा आध्ार मेरी पहचान
+1947
+help@uidai gov in
+WW uidai govin
+
+LLM RESPONSE:
+{
+  "name": "Devesh Krishn",
+   "age": null,
+   "gender": null,
+   "pan_number": null,
+   "aadhaar_number": "966027836699",
+   "category": null,
+   "annual_income": null,
+   "state": "UP",
+   "city": "Mathura",
+   "area_type": "rural"
+}
