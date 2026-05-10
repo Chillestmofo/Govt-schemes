@@ -636,6 +636,34 @@ function startChat() {
     } else {
         updateUIForAnonymousUser();
     }
+    
+    // Trigger initial greeting if chat history is empty
+    if (chatHistory.length === 0) {
+        triggerInitialGreeting();
+    }
+}
+
+async function triggerInitialGreeting() {
+    try {
+        const response = await fetch(API_BASE_URL + '/chat', {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: 'include',
+            body: JSON.stringify({
+                message: "initial_greeting_trigger",
+                history: [],
+                target_lang: currentLanguage,
+                user_id: currentUser ? currentUser.user_id : null
+            })
+        });
+        const data = await response.json();
+        if (data.reply) {
+            addMessage("Assistant", data.reply, "bot");
+            chatHistory.push({ role: "assistant", content: data.reply });
+        }
+    } catch (e) {
+        console.error("Initial greeting failed", e);
+    }
 }
 
 function continueAsGuest() {
@@ -1278,7 +1306,11 @@ async function sendMessage() {
         chatHistory.push({ role: "user", content: message });
         chatHistory.push({ role: "assistant", content: data.reply });
 
-        addMessage("Assistant", data.reply || "Thinking...", "bot", data.sources);
+        if (data.reply) {
+            addMessage("Assistant", data.reply, "bot", data.sources);
+        } else {
+            addMessage("Assistant", "I'm sorry, I encountered an error. Please try again later.", "bot");
+        }
 
     } catch (error) {
         console.error("Chat Error:", error);

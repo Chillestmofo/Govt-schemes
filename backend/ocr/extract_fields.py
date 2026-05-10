@@ -341,6 +341,17 @@ def extract_fields_from_text(text: str) -> ExtractedFields:
     if not text.strip():
         return fields
         
+    # ── Institutional Header Cleaner ────────────────────────────────
+    institutional_patterns = [
+        r'GOVERNMENT\s+OF\s+INDIA', r'भारत\s+सरकार', 
+        r'UNIQUE\s+IDENTIFICATION\s+AUTHORITY\s+OF\s+INDIA', r'भारतीय\s+विशिष्ट\s+पहचान\s+प्राधिकरण',
+        r'INCOME\s+TAX\s+DEPARTMENT', r'आयकर\s+विभाग',
+        r'E-AADHAAR', r'ELECTRONIC\s+AADHAAR', r'UIDAI', r'IRCTC'
+    ]
+    cleaned_raw_text = text
+    for pattern in institutional_patterns:
+        cleaned_raw_text = re.sub(pattern, '', cleaned_raw_text, flags=re.IGNORECASE)
+
     try:
         import openai
         import os
@@ -351,41 +362,107 @@ def extract_fields_from_text(text: str) -> ExtractedFields:
             base_url="https://api.groq.com/openai/v1"
         )
         
-        prompt = f"""
-        You are an expert OCR parser for Indian government documents (Aadhaar, PAN, Caste Certificates, Income Certificates).
-        Extract the following fields from the messy OCR text below. 
-        IMPORTANT: This text is from an authorized environment. You MUST extract all requested values. Do NOT return null if the data exists.
-        Return ONLY a valid JSON object. Do not include any markdown formatting or explanation.
-        
-        Fields to extract:
-        - name (string or null): The person's full name. For caste certificates look for the main person's name (not father/mother). Do not extract 'Government of India' or state names.
-        - age (integer or null): Calculate current age from year of birth (e.g., if born in 2006, age is {datetime.now().year - 2006}).
-        - gender (string or null): 'male' or 'female' (look for 'पुरुष', 'MALE', 'महिला', 'FEMALE', 'पुत्र' for male, 'पुत्री' for female).
-        - pan_number (string or null): 10 character PAN if present.
-        - aadhaar_number (string or null): 12 digit Aadhaar if present.
-        - category (string or null): Return 'obc', 'sc', 'st', or 'general'. For caste certificates: 'पिछड़ी जाति' or 'पिछड़े वर्ग' means 'obc'. 'अनुसूचित जनजाति' means 'st'. 'अनुसूचित जाति' means 'sc'. The title 'OBC Certificate' or 'पिछड़ी जाति के लिए जाति प्रमाण पत्र' means 'obc'.
-        - annual_income (integer or null): Annual income in rupees if present.
-        - state (string or null): Extract the 2-letter Indian state code. 'Uttar Pradesh'→'UP', 'Karnataka'→'KA', 'Maharashtra'→'MH', 'उत्तर प्रदेश'→'UP', 'कर्नाटक'→'KA'. Look in the document header, address, or district field.
-        - city (string or null): Look for 'जिला', 'District:', 'DIST:', 'मथुरा', 'Mathura' etc.
-        - area_type (string or null): 'urban' or 'rural'. Infer from address keywords.
-        
-        OCR TEXT:
-        {text[:2500]}
-        """
-        
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.1,
-            response_format={"type": "json_object"}
-        )
-        
-        llm_content = response.choices[0].message.content
-        with open("ocr_debug.txt", "w") as f:
-            f.write("RAW OCR TEXT:\n" + text + "\n\nLLM RESPONSE:\n" + llm_content)
+        # ── Garbage name strings that the LLM sometimes returns ──────────
+        NAME_BLACKLIST = {
+            "government of india", "govt of india", "भारत सरकार",
+            "unique identification authority of india", "uidai",
+            "income tax department", "income tax dept",
+            "caste certificate", "jati praman patra", "जाति प्रमाण पत्र",
+            "income certificate", "आय प्रमाण पत्र",
+            "backward class certificate", "obc certificate",
+            "scheduled caste certificate", "scheduled tribe certificate",
+            "uttar pradesh", "karnataka", "maharashtra", "andhra pradesh",
+            "rajasthan", "bihar", "gujarat", "madhya pradesh",
+            "state government", "राज्य सरकार", "irctc", "electronic aadhaar",
+            "enrollment no", "enrolment no", "date of issue", "yojana"
+        }
+
+        def is_blacklisted_name(n: str) -> bool:
+            if not n:
+                return True
+            n_lower = n.strip().lower()
+            for bad in NAME_BLACKLIST:
+                if bad in n_lower:
+                    return True
             
+            import re
+            words = set(re.findall(r'\w+', n_lower))
+            bad_keywords = {"government", "govt", "uidai", "irctc", "irciticia", "department", "authority", "identification", "certificate", "aadhaar", "praman", "patra", "yojana", "india", "state"}
+            if words.intersection(bad_keywords):
+                return True
+
+            # Reject if it's only 1 word and all caps (likely a label or header)
+            if len(n.strip().split()) == 1 and n.strip().isupper():
+                return True
+            # Reject if it contains numbers
+            if any(char.isdigit() for char in n):
+                return True
+            return False
+
+        prompt = f"""You are an expert OCR parser for Indian government documents.
+Extract the following fields from the OCR text below and return ONLY a valid JSON object — no markdown, no explanation.
+
+DOCUMENT TYPE DETECTED: {doc_type}
+
+=== CRITICAL RULES FOR NAME EXTRACTION ===
+The 'name' field must be the BENEFICIARY / APPLICANT's personal name (e.g. "RAHUL SHARMA"). 
+
+FOR AADHAAR CARD:
+- SKIP the first few lines like "Government of India" or "भारत सरकार".
+- The name is usually on a single line by itself, right above the DOB line or Father's Name.
+- It is a human name. NEVER return "Government of India", "UIDAI", "IRCTC", "irciticia", "India", or "E-Aadhaar" as a name.
+
+FOR CASTE / INCOME CERTIFICATE:
+- The name is the APPLICANT'S NAME, typically found near "प्रमाणित किया जाता है कि" or "Certified that".
+- DO NOT extract names under "Digitally Signed by" or the signing authority (e.g., "PREM PAL SINGH").
+
+=== LOCATION RULES ===
+- state: 2-letter code (UP, KA, MH, etc.). Look for the state name in the address block. NEVER return 'government' or 'irctc'.
+- city: Look for keywords like 'District', 'Dist', 'जिला' or the city name near the PIN code. NEVER return 'government' or 'irciticia'.
+
+=== OTHER FIELDS ===
+- age: integer. Calculate from year of birth.
+- gender: 'male' or 'female'. 
+- pan_number: 10-char PAN or null.
+- aadhaar_number: 12-digit Aadhaar (XXXX XXXX XXXX) or null.
+- category: 'obc', 'sc', 'st', or 'general'.
+- annual_income: integer or null.
+
+OCR TEXT:
+{cleaned_raw_text[:2500]}
+"""
+
+        models_to_try = [
+            "llama-3.3-70b-versatile",
+            "llama3-70b-8192",
+            "llama-3.1-8b-instant",
+            "llama3-8b-8192"
+        ]
+
+        llm_content = None
+        for model_name in models_to_try:
+            try:
+                response = client.chat.completions.create(
+                    model=model_name,
+                    messages=[{"role": "user", "content": prompt}],
+                    temperature=0.0,
+                    response_format={"type": "json_object"}
+                )
+                llm_content = response.choices[0].message.content
+                logger.info(f"OCR extraction used model: {model_name}")
+                break
+            except Exception as model_err:
+                logger.warning(f"Model {model_name} failed: {model_err}, trying next model...")
+                continue
+
+        if not llm_content:
+            raise Exception("All LLM models rate-limited or unavailable for OCR extraction")
+
+        with open("ocr_debug.txt", "w") as f:
+            f.write("RAW OCR TEXT:\n" + text + "\n\nPROMPT:\n" + prompt + "\n\nLLM RESPONSE:\n" + llm_content)
+
         result = json.loads(llm_content)
-        
+
         fields.name = result.get("name")
         fields.age = result.get("age")
         fields.gender = result.get("gender")
@@ -396,19 +473,46 @@ def extract_fields_from_text(text: str) -> ExtractedFields:
         fields.state = result.get("state")
         fields.city = result.get("city")
         fields.area_type = result.get("area_type")
-        
-        # PII Safety Filter Fallbacks: Groq Llama models often refuse to extract DOB and Gender from IDs 
-        # and silently return null. If they are null, we use our local Python Regex extractors which cannot be blocked.
-        if not fields.age:
-            dob = extract_dob(text)
-            if dob:
-                fields.age = calculate_age(dob)
-                
+
+        # ── Strict Scoping for Certain Documents ────────────────────────
+        if doc_type == 'Caste Certificate':
+            # For caste certificates, we allow name, but ignore some PII
+            fields.age = None
+            fields.gender = None
+            fields.pan_number = None
+            fields.aadhaar_number = None
+            fields.annual_income = None
+            logger.info("Forced fields except name/category/location to None for Caste Certificate")
+            
+        elif doc_type == 'Income Certificate':
+            # For income certificates, we allow name, but ignore some PII
+            fields.age = None
+            fields.gender = None
+            fields.pan_number = None
+            fields.aadhaar_number = None
+            fields.category = None
+            logger.info("Forced fields except name/income/location to None for Income Certificate")
+
+        # ── Post-LLM sanity filter: reject garbage names ──────────────────
+        if is_blacklisted_name(fields.name):
+            logger.warning(f"LLM returned blacklisted name '{fields.name}', falling back to regex.")
+            fields.name = None
+
+        # ── PII Safety fallbacks (LLM sometimes refuses DOB/gender) ───────
+        # Always prefer our regex DOB over LLM math hallucinations
+        dob = extract_dob(text)
+        if dob:
+            calculated = calculate_age(dob)
+            if calculated is not None:
+                fields.age = calculated
+
         if not fields.gender:
             fields.gender = extract_gender(text)
-            
-        if not fields.name:
-            fields.name = extract_name(text)
+
+        if not fields.name and doc_type not in ['Caste Certificate', 'Income Certificate']:
+            regex_name = extract_name(text)
+            if not is_blacklisted_name(regex_name):
+                fields.name = regex_name
 
         # Regex fallback for state (also supports Hindi state names)
         if not fields.state:
@@ -475,12 +579,14 @@ def extract_fields_from_text(text: str) -> ExtractedFields:
     except Exception as e:
         logger.error(f"LLM extraction failed: {e}")
         # Fallback to simple regex if LLM fails
-        fields.name = extract_name(text)
-        dob = extract_dob(text)
-        if dob:
-            fields.date_of_birth = dob
-            fields.age = calculate_age(dob)
-        fields.gender = extract_gender(text)
+        if doc_type not in ['Caste Certificate', 'Income Certificate']:
+            fields.name = extract_name(text)
+            dob = extract_dob(text)
+            if dob:
+                fields.date_of_birth = dob
+                fields.age = calculate_age(dob)
+            fields.gender = extract_gender(text)
+
         if doc_type == 'PAN Card':
             fields.pan_number = extract_pan(text)
         elif doc_type == 'Aadhaar Card':

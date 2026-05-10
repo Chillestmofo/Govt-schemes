@@ -1479,7 +1479,12 @@ def detect_intent(message: str) -> str:
     if any(p in msg_lower for p in general_patterns):
         return "general_chat"
 
-    if len(msg_lower) < 15 and any(g in msg_lower for g in GREETING_PATTERNS[:14]):
+    # Handle technical trigger from frontend
+    if normalized == "initialgreetingtrigger":
+        return "greeting"
+
+    # Only return greeting if the message is actually just a short greeting
+    if len(normalized) < 10 and any(normalized == g for g in GREETING_PATTERNS):
         return "greeting"
     
     if any(t in msg_lower for t in ["thank", "thanks", "धन्यवाद", "शुक्रिया"]):
@@ -2004,7 +2009,7 @@ async def chat(request: Request, req: ChatRequest):
                 db.set_scheme_lock(req.user_id, None, False)
                 return ChatResponse(reply=localized_reply("Scheme lock disabled. I will use all relevant schemes again."), detected_language=detected_lang, language_name=language_name, original_message=original_message, translated_message=None)
 
-        if intent == "greeting":
+        if intent == "greeting" or "initial_greeting_trigger" in lowered_message:
             if user_profile:
                 first_name = str(user_profile.get("name") or "").split(" ")[0] or "there"
                 reply = (
@@ -2166,7 +2171,7 @@ async def chat(request: Request, req: ChatRequest):
                         original_message=original_message,
                         translated_message=english_message if source_lang != "en_XX" else None
                     )
-            if not docs:
+            if not docs and intent != "greeting":
                 docs = base_docs[:15]
         else:
             # Guest flow: collect minimal details before broad matching.
@@ -2178,7 +2183,7 @@ async def chat(request: Request, req: ChatRequest):
                 ["scheme", "yojana", "find", "search", "category", "eligible", "eligibility", "benefit", "scholarship", "loan"]
             )
 
-            if missing and asked_for_search:
+            if missing and (asked_for_search or intent == "greeting"):
                 question = next_guest_question(missing[0])
                 prompt = (
                     f"{question}\n\n"
@@ -2377,23 +2382,45 @@ async def websocket_chat(websocket: WebSocket):
                         api_key=os.getenv("GROQ_API_KEY", "your_groq_api_key_here"),
                         base_url="https://api.groq.com/openai/v1"
                     )
-                    system_prompt = f"You are a helpful Indian government scheme assistant. Use the following context:\n{context}"
-                    messages_for_ai = [{"role": "system", "content": system_prompt}]
-                    for h in history[-6:]:
-                        messages_for_ai.append({"role": h.get("role", "user"), "content": h.get("content", "")})
-                    messages_for_ai.append({"role": "user", "content": english_message})
+                    try:
+                        # Model fallback for WebSocket
+                        models = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "llama3-70b-8192", "llama3-8b-8192"]
+                        stream = None
+                        for model_name in models:
+                            try:
+                                stream  = client_ai.chat.completions.create(
+                                    model=model_name,
+                                    messages=[
+                                        {"role": "system", "content": "You are a helpful government scheme assistant. Use the following context to answer.\n\nContext:\n" + context + "\n\nIf the user asks a specific question about a scheme (like 'how to apply' or 'what are the benefits'), answer their question directly using the context. If they ask what schemes they are eligible for, list the relevant schemes."},
+                                        {"role": "user", "content": english_message}
+                                    ],
+                                    stream=True,
+                                )
+                                break
+                            except Exception as e:
+                                if "rate_limit" in str(e).lower() or "429" in str(e):
+                                    continue
+                                raise e
 
-                    completion = client_ai.chat.completions.create(
-                        model="llama-3.3-70b-versatile",
-                        messages=messages_for_ai,
-                        stream=True,
-                    )
+                        if not stream:
+                            raise Exception("All models rate limited or unavailable")
 
-                    for chunk in completion:
-                        delta = chunk.choices[0].delta
-                        if delta.content:
-                            full_reply += delta.content
-                            await websocket.send_json({"type": "chunk", "content": delta.content})
+                        full_reply = ""
+                        for chunk in stream:
+                            if chunk.choices and chunk.choices[0].delta:
+                                delta = chunk.choices[0].delta
+                                if delta.content:
+                                    full_reply += delta.content
+                                    await websocket.send_json({"type": "chunk", "content": delta.content})
+                        
+                        # Final response
+                        await websocket.send_json({"type": "done", "reply": full_reply})
+                        if req.user_id:
+                            db.append_chat_entry(req.user_id, original_message, full_reply)
+
+                    except Exception as e:
+                        logger.error(f"WebSocket generation error: {e}")
+                        await websocket.send_json({"type": "error", "message": str(e)})
 
                 # Translate back if needed
                 final_reply = full_reply

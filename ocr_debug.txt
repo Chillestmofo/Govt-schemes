@@ -28,16 +28,68 @@ Goverment of India
 help@uidai gov in
 WW uidai govin
 
+PROMPT:
+You are an expert OCR parser for Indian government documents.
+Extract the following fields from the OCR text below and return ONLY a valid JSON object — no markdown, no explanation.
+
+DOCUMENT TYPE DETECTED: Aadhaar Card
+
+=== CRITICAL RULES FOR NAME EXTRACTION ===
+The 'name' field must be the BENEFICIARY / APPLICANT's personal name (e.g. "RAHUL SHARMA"). 
+
+FOR AADHAAR CARD:
+- SKIP the first few lines like "Government of India" or "भारत सरकार".
+- The name is usually on a single line by itself, right above the DOB line or Father's Name.
+- It is a human name. NEVER return "Government of India", "UIDAI", "IRCTC", "irciticia", "India", or "E-Aadhaar" as a name.
+
+FOR CASTE / INCOME CERTIFICATE:
+- The name is the APPLICANT'S NAME, typically found near "प्रमाणित किया जाता है कि" or "Certified that".
+- DO NOT extract names under "Digitally Signed by" or the signing authority (e.g., "PREM PAL SINGH").
+
+=== LOCATION RULES ===
+- state: 2-letter code (UP, KA, MH, etc.). Look for the state name in the address block. NEVER return 'government' or 'irctc'.
+- city: Look for keywords like 'District', 'Dist', 'जिला' or the city name near the PIN code. NEVER return 'government' or 'irciticia'.
+
+=== OTHER FIELDS ===
+- age: integer. Calculate from year of birth.
+- gender: 'male' or 'female'. 
+- pan_number: 10-char PAN or null.
+- aadhaar_number: 12-digit Aadhaar (XXXX XXXX XXXX) or null.
+- category: 'obc', 'sc', 'st', or 'general'.
+- annual_income: integer or null.
+
+OCR TEXT:
+माग्न   सरकार
+आधार
+Goverrimierit Iriclia
+AADHAAR
+
+सूचना INFORMATION
+
+आधार पहचान प्रमाण है नागरिकता या जन्मतिथि का नर्हीl जन्मतिथि आधार नबर धारक द्वारा पस्तुत्त सूचना और विनियर्मों में विनिर्दिष्ट जन्मतिथि प्रमाण के दस्तावेज पर आधारित है डस आधार पत्र को यूआईडीएआई द्वारा नियुक्त प्रमाणीकरण एजेंसी के जरिए ऑनलाइन प्रमाणीकरण के द्वारा सत्यापित किया जाना चाहिए या ऐप स्टोर में उपलब्ध एमआधार या आधार क्यूआर कोड स्कैनर ऐप से क्यूआर कोड को स्कैन करके या  WW  gov in. पर उपलब्ध सुरदषित क्यूआर कोड रोडर का उपयोग करके सत्यापित किया जाना चाहिए आधार विशिष्ट और सुरक्षित है पहचान और पते के समर्थन र्में दस्तावेजों को आधार के लिए नामांकन की तारीख से प्रत्येक १० वर्ष र्में कम से कम एक बार आधार र्मे अपडेट कराना चाहिए आधार विभिन्न सरकारी और गैर्सरकारी फायदौं सेवाओं का लाभ लेने में सहायता करता है आधार र्में अपना मोबाइल नंबर और ईमेल आईडी अपडेट रर्खे | आधार सेवाओं का लाभ लेने के लिए एमआधार ऐप डाउनलोड करें | आधार बॉयोमेट्रिक्स का उपयोग न करने के समय सुरक्षा सुनिश्चित करने के लिए आधार बॉयोमेट्रिक्स्त लॉकाअनलॉक मुविधा का उपयोग करें| आधार की मांग करने वाले सहमति लेने के लिए बाध्य हैं| Aadhaar is proof of identity not of citizenship or date of birth IDOBJ. DOB is based on information supported by proof ofDOB document specifiedin regulations, submittedby Aadhaar number holder This Aadhaar letter should be verified through either online authentication by UIDAl appointed authentication agency or QR code scanning using mAadhaar or Aadhaar QR Scanner app available in app stores Or using secure OR code reader app available on 7177  govin Aadhaar unique and secure Documents to support identity and address should be updated in Aadhaar after every १० years from date of enrolment for Aachaar. Aadhaar helps yOU avail of various Government and Non- Government benefits services Keep your mobile number and email id updated in Aadhaar. Download mAadhaar app to avail of Aadhaar services. Use the feature of Lock Unlock Aadhaar biometrics to ensure security when not using Aadhaar biometrics Entities seeking Aadhaar are obligated to seek consent
+  नामांकन क्रम Enrolment No.: 0870/28151/03123
+देवेश कृष्ण Devesh Krishn SO: Neeraj Kumar,
+sector 4, radha puram estate VTC: Mathura Bangar, PO: Krishna Nagar, Sub District: Chhata District: Mathura, State: Uttar Pradesh PIN Code: २४10०4 Hlobile: 8755838888
+SIDn=LLIB
++ETIfIB-
+Dalalkae UnFula 2075.09.15 1$21:23
+आपका आधार क्रमांक Your Aadhaar No. 9660 2783 6699 VID : 9153 7265 7359 5388 मेरा आधार , मेरी पहचान
+
+भारतीय विशेिष्ट पहचान प्राधिकरण 
+Goverment of India
+देवेश 
+
+
 LLM RESPONSE:
 {
-  "name": "Devesh Krishn",
-   "age": null,
-   "gender": null,
+  "document_type": "Aadhaar Card",
+   "name": "देवेश कृष्ण",
+   "age": 47,
+   "gender": "male",
    "pan_number": null,
    "aadhaar_number": "966027836699",
-   "category": null,
+   "category": "general",
    "annual_income": null,
    "state": "UP",
-   "city": "Mathura",
-   "area_type": "rural"
+   "city": "Mathura"
 }

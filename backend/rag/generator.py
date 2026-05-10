@@ -17,15 +17,15 @@ You are in SIGNED-IN mode. Provide personalized and actionable guidance.
 MANDATORY RULES:
 1. Use ONLY the schemes present in the provided context.
 2. Never invent links, deadlines, or document requirements.
-3. For each scheme, provide:
+3. IF the user asks for scheme recommendations or what they are eligible for, provide for each scheme:
    - Status: Eligible ✅ / Possibly Eligible ⚠️ / Not Eligible ❌
    - Why this status was assigned (from eligibility checks and profile)
    - Benefits (short)
    - Required documents (if available, otherwise "Not clearly listed")
    - Deadline (if available, otherwise "Not specified")
    - Official/apply link (if present, otherwise "Not Provided")
-4. **APPLICATION STEPS**: If the context contains application steps or a "How to Apply" section, EXPLAIN the clear next steps for the user. If not explicitly present, suggest checking the official link provided.
-5. If user asks for one scheme specifically, prioritize that scheme and keep alternatives minimal.
+4. IF the user asks a specific question about a scheme (e.g., "how do I apply for PM Kisan"), DIRECTLY ANSWER their specific question using the context. Do not force the list format from rule 3.
+5. **APPLICATION STEPS**: If the context contains application steps or a "How to Apply" section, EXPLAIN the clear next steps for the user. If not explicitly present, suggest checking the official link provided.
 6. Keep answer concise and practical.
 """
 
@@ -35,15 +35,8 @@ You are in GUEST mode. Keep answers exploratory, low-friction, and informational
 
 MANDATORY RULES:
 1. Use ONLY the schemes present in context.
-2. Do not claim final eligibility. Use:
-   - Likely Eligible ✅
-   - Possibly Eligible ⚠️
-   - Might Not Be Eligible ❌
-3. For each scheme include:
-   - Scheme name
-   - One-line description
-   - Major benefits
-   - High-level eligibility summary
+2. IF the user asks for recommendations, include: Scheme name, description, benefits, and eligibility summary. Do not claim final eligibility (use Likely/Possibly/Might Not).
+3. IF the user asks a specific question about a scheme, DIRECTLY ANSWER their question without forcing a full scheme list.
 4. Keep recommendations informational and concise. Do not output repetitive closing lines.
 5. Keep it simple and avoid asking for documents or sensitive IDs.
 """
@@ -141,18 +134,30 @@ def generate_answer(user_question: str, context_documents: List[Document], histo
     
     messages.append({"role": "user", "content": user_message})
 
-    # 5. Call LLM
+    # 5. Call LLM with Fallback
     import os
     if os.getenv("APP_TEST_MODE", "0") == "1":
-        return "[TEST MODE] This is a mocked response since APP_TEST_MODE is enabled. In a real environment, the AI would provide details about eligible schemes based on your query."
-    
-    response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        messages=messages,
-        temperature=0.1, # Keep low for strict adherence to facts
-    )
+        return "[TEST MODE] This is a mocked response."
 
-    return response.choices[0].message.content.strip()
+    models = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "llama3-70b-8192", "llama3-8b-8192"]
+    
+    last_error = None
+    for model_name in models:
+        try:
+            response = client.chat.completions.create(
+                model=model_name,
+                messages=messages,
+                temperature=0.1,
+            )
+            return response.choices[0].message.content.strip()
+        except Exception as e:
+            last_error = e
+            if "rate_limit" in str(e).lower() or "429" in str(e):
+                print(f"[WARN] Rate limit hit for {model_name}, trying fallback...")
+                continue
+            break
+            
+    return f"I'm sorry, I encountered a technical error: {str(last_error)}"
 
 
 def build_profile_context(profile: Dict) -> str:

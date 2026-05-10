@@ -27,11 +27,11 @@
             --text: #1A1A1A;
             --text-muted: #525252;
             --text-dim: #A3A3A3;
-            --accent: #047857;
-            --accent-light: #10b981;
-            --accent-hover: #059669;
+            --accent: #007a99;
+            --accent-light: #00d4ff;
+            --accent-hover: #00b4d8;
             --accent-bg: #ECFDF5;
-            --green: #059669;
+            --green: #00b4d8;
             --green-bg: rgba(5, 150, 105, 0.08);
             --red: #DC2626;
             --red-bg: rgba(220, 38, 38, 0.06);
@@ -288,7 +288,7 @@
         .login-card input:focus {
             outline: none;
             border-color: var(--accent-light);
-            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
         }
 
         .login-error {
@@ -1015,7 +1015,7 @@
                             analytics.autosuggest_count || 0,
                             analytics.checklist_count || 0
                         ],
-                        backgroundColor: ['#047857', '#059669', '#10b981', '#34d399', '#6ee7b7'],
+                        backgroundColor: ['#007a99', '#00b4d8', '#00d4ff', '#34d399', '#6ee7b7'],
                         borderRadius: 6,
                         borderSkipped: false
                     }]
@@ -1042,7 +1042,7 @@
                     labels: ['Delivered', 'Failed'],
                     datasets: [{
                         data: [success, failure],
-                        backgroundColor: ['#059669', '#DC2626'],
+                        backgroundColor: ['#00b4d8', '#DC2626'],
                         borderWidth: 0,
                         spacing: 2
                     }]
