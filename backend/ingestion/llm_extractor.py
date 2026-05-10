@@ -66,26 +66,27 @@ class LLMExtractor:
     
     def __init__(self, model: str = None, temperature: float = 0.0):
         """
-        Initialize the LLM extractor.
+        Initialize the LLM extractor using Groq.
         
         Args:
-            model: OpenAI model to use (default: gpt-4o-mini)
+            model: Groq model to use (default: llama-3.3-70b-versatile)
             temperature: LLM temperature (default: 0.0 for deterministic)
         """
-        api_key = os.getenv("OPENAI_API_KEY")
+        api_key = os.getenv("GROQ_API_KEY")
         if not api_key:
-            raise RuntimeError("OPENAI_API_KEY is not set")
+            raise RuntimeError("GROQ_API_KEY is not set")
         
-        self.model = model or os.getenv("LLM_EXTRACTION_MODEL", "gpt-4o-mini")
+        self.model = model or os.getenv("LLM_EXTRACTION_MODEL", "llama-3.3-70b-versatile")
         self.temperature = temperature
         
         self.llm = ChatOpenAI(
             model=self.model,
             temperature=self.temperature,
-            openai_api_key=api_key
+            openai_api_key=api_key,
+            base_url="https://api.groq.com/openai/v1"
         )
         
-        logger.info(f"LLMExtractor initialized with model={self.model}")
+        logger.info(f"LLMExtractor initialized with Groq model={self.model}")
     
     def extract_facts(self, page_content: str) -> List[Dict]:
         """

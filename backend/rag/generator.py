@@ -144,7 +144,7 @@ def generate_answer(user_question: str, context_documents: List[Document], histo
     # 5. Call LLM
     import os
     if os.getenv("APP_TEST_MODE", "0") == "1":
-        return "[TEST MODE] This is a mocked response since no OpenAI API Key was provided. In a real environment, the AI would provide details about eligible schemes based on your query."
+        return "[TEST MODE] This is a mocked response since APP_TEST_MODE is enabled. In a real environment, the AI would provide details about eligible schemes based on your query."
     
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",

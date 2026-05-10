@@ -27,16 +27,16 @@ class Settings(BaseSettings):
         BASE_DIR / "backend" / "data" / "chroma_db"
     )
 
-    # LLM Extraction (NEW)
-    LLM_EXTRACTION_MODEL: str = "gpt-4o-mini"
+    # LLM Extraction (Using Groq)
+    LLM_EXTRACTION_MODEL: str = "llama-3.3-70b-versatile"
     LLM_EXTRACTION_TEMPERATURE: float = 0.0
     SEMANTIC_COLLECTION_NAME: str = "semantic_facts"
     EXTRACTION_CACHE_DIR: str = str(
         BASE_DIR / "backend" / "data" / "extracted"
     )
 
-    # LLM Model
-    LLM_MODEL: str = "gpt-4-turbo-preview"
+    # LLM Model (Using Groq)
+    LLM_MODEL: str = "llama-3.3-70b-versatile"
     
     # RAG Configuration
     TOP_K_RESULTS: int = 5

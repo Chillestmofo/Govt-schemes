@@ -2365,7 +2365,7 @@ async def websocket_chat(websocket: WebSocket):
                 
                 full_reply = ""
                 if os.getenv("APP_TEST_MODE", "0") == "1":
-                    mock_response = "[TEST MODE] This is a mocked streaming response via WebSocket. No OpenAI API key was provided."
+                    mock_response = "[TEST MODE] This is a mocked streaming response via WebSocket. APP_TEST_MODE is currently enabled."
                     words = mock_response.split(" ")
                     for word in words:
                         chunk_content = word + " "
